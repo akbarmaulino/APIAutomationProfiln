@@ -11,8 +11,8 @@ import org.testng.annotations.Test;
 //        plugin = {"pretty", "html:target/cucumber-reports/Login.html"},
 
 //        ResetPassword
-        features = "src/test/java/Feature/Login.feature",
-        plugin = {"pretty", "html:target/cucumber-reports/Login.html"},
+        features = "src/test/java/Feature/User/FollowUnfollowUser.feature",
+        plugin = {"pretty", "html:target/cucumber-reports/FollowUnfollowUser.html"},
         monochrome = true,
         glue = {"Steps"}
 )

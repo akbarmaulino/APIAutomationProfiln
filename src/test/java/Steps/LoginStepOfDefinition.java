@@ -15,25 +15,26 @@ import io.restassured.specification.RequestSpecification;
 import java.io.File;
 
 
+
 public class LoginStepOfDefinition {
 
     private Response response;
     private JSONObject requestBody;
-    public String token_Account_1 = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImZhenJpLmVnaUBiaW5hci5jby5pZCIsImV4cCI6MTcxOTAzMTY5OSwiaWQiOjF9.CivEHJmvYKjYNOAywA_8lohocjrTCaMjnJU7Nhe9Ou4";
-    public String token_Account_2 = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImNvYmExMjNAZ21haWwuY29tIiwiZXhwIjoxNzE5MDMxNzI0LCJpZCI6NTN9.UCkEHulPUBAiAt1jTj3YP_ivgsMfV86jlv4hVGa0vNI";
+    public String token_Account_1 = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImZhenJpLmVnaUBiaW5hci5jby5pZCIsImV4cCI6MTcxOTU3NzcwMCwiaWQiOjF9.sxSP2TKAoJDNaxcpSVzQU4TeObqcuptFep5d33jIAfY";
+    public String token_Account_2 = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6IkV4YW1wbGUwQGdtYWlsLmNvbSIsImV4cCI6MTcxOTU3Nzc0NSwiaWQiOjEwfQ.IyjWFu6YRo4wOgoQdwC1aYdeu6wlR3vDxlB8DKwN_iI";
 
     // Initiation
 
     @Given("User set API endpoint")
     public void user_set_post_api_endpoint() {
-        RestAssured.baseURI = "http://35.208.89.94";
+        RestAssured.baseURI = "http://35.208.89.94:8080";
     }
 
     // Login
 
     @When("User send POST HTTPS Request using valid Email and Password")
     public void user_send_post_https_request_using_valid_email_and_password() {
-        requestBody = new JSONObject();
+        JSONObject requestBody = new JSONObject();
         requestBody.put("email", "fazri.egi@binar.co.id");
         requestBody.put("password", "Coba123!");
 
@@ -42,6 +43,8 @@ public class LoginStepOfDefinition {
                 .body(requestBody.toString())
                 .when()
                 .post(RestAssured.baseURI + "/api/v1/login?type=app");
+
+
     }
 
     @When("User send POST HTTPS Request using Wrong Format Email and Password")
@@ -61,7 +64,6 @@ public class LoginStepOfDefinition {
     public void user_send_post_https_request_using_sso_email(){
         requestBody = new JSONObject();
         requestBody.put("email", "fazri.egi@binar.co.id");
-
         response = given()
                 .contentType(ContentType.JSON)
                 .body(requestBody.toString())
@@ -74,7 +76,6 @@ public class LoginStepOfDefinition {
         requestBody = new JSONObject();
         requestBody.put("email", "egi@mail.com");
         requestBody.put("password", "fazri.egi@binar.co.id");
-
         response = given()
                 .contentType(ContentType.JSON)
                 .body(requestBody.toString())
@@ -193,6 +194,44 @@ public class LoginStepOfDefinition {
                 .post(RestAssured.baseURI + "/api/v1/reset-password");
     }
 
+    //Send Reset Password To Email
+
+    @When("User send POST HTTPS For Send Link Reset Password With Valid Email")
+    public void User_send_POST_HTTPS_For_Send_Link_Reset_Password_With_Valid_Email(){
+        requestBody = new JSONObject();
+        requestBody.put("email", "fazri.egi@binar.co.id");
+
+        response = given()
+                .contentType(ContentType.JSON)
+                .body(requestBody.toString())
+                .when()
+                .post(RestAssured.baseURI + "/api/v1/email/reset-password");
+    }
+
+    @When("User send POST HTTPS For Send Link Reset Password With Unregistered Email")
+    public void User_send_POST_HTTPS_For_Send_Link_Reset_Password_With_Unregistered_Email(){
+        requestBody = new JSONObject();
+        requestBody.put("email", "test@example.com");
+
+        response = given()
+                .contentType(ContentType.JSON)
+                .body(requestBody.toString())
+                .when()
+                .post(RestAssured.baseURI + "/api/v1/email/reset-password");
+    }
+
+    @When("User send POST HTTPS For Send Link Reset Password Without Input Email")
+    public void User_send_POST_HTTPS_For_Send_Link_Reset_Password_Without_Input_Email(){
+        requestBody = new JSONObject();
+        requestBody.put("email", " ");
+
+        response = given()
+                .contentType(ContentType.JSON)
+                .body(requestBody.toString())
+                .when()
+                .post(RestAssured.baseURI + "/api/v1/email/reset-password");
+    }
+
     //Follow Recommendations
 
     @When("User send Get HTTPS Request For Follow Recommendations Without Login")
@@ -215,6 +254,41 @@ public class LoginStepOfDefinition {
         RequestSpecification request = RestAssured.given();
         String url = baseURI + "/api/v1/users/me/follow-recommendations?page=1&limit=5";
         response = request.get(url);
+    }
+
+    //Follow Unfollow USer
+    @When("User send Post HTTPS Request For Follow Another User")
+    public void User_send_Post_HTTPS_Request_For_Follow_Another_User_No_Auth(){
+
+        response = given()
+                .header("Authorization", "Bearer " + token_Account_1)
+                .when()
+                .post(RestAssured.baseURI + "/api/v1/users/2/follow");
+    }
+
+    @When("User send Post HTTPS Request For Follow Another User No Auth")
+    public void User_send_Post_HTTPS_Request_For_Follow_Another_User(){
+
+        response = given()
+                .when()
+                .post(RestAssured.baseURI + "/api/v1/users/2/follow");
+    }
+
+    @When("User send Delete HTTPS Request For Unfollow Another User")
+    public void User_send_Delete_HTTPS_Request_For_Unfollow_Another_User(){
+
+        response = given()
+                .header("Authorization", "Bearer " + token_Account_1)
+                .when()
+                .delete(RestAssured.baseURI + "/api/v1/users/2/follow");
+    }
+
+    @When("User send Delete HTTPS Request For Unfollow Another User No Auth")
+    public void User_send_Delete_HTTPS_Request_For_Unfollow_Another_User_No_Auth(){
+
+        response = given()
+                .when()
+                .delete(RestAssured.baseURI + "/api/v1/users/2/follow");
     }
 
     // Post User Login
@@ -266,14 +340,49 @@ public class LoginStepOfDefinition {
 
     @When("User send POST HTTPS Request For Comment Post")
     public void user_send_post_https_request_for_comment_post(){
-        File gambar = new File("D:/Binar/Binar Labs/Profiln/QA/API Automation/Image/2.jpg");
+//        File gambar = new File("D :/Binar/Binar Labs/Profiln/QA/API Automation/Image/2.jpg");
+//        File imageFile = new File("test/Image/2.jpg");
+//
+//
+//        response = given()
+//                .multiPart("content", "coba Comment")
+//                .multiPart("files", imageFile)
+//                .header("Authorization", "Bearer " + token_Account_1)
+//                .contentType("multipart/form-data")
+//                .when()
+//                .post(RestAssured.baseURI + "/api/v1/posts/3/comments");
+//        if (!imageFile.exists()) {
+//            throw new RuntimeException("File not found: " + imageFile.getAbsolutePath());
+//        }
+//        File gambar = new File("D:\\Binar\\Binar Labs\\Profiln\\QA\\API Automation\\Image\\2.jpg");
+        File gambar = new File("D:\\Binar\\Binar Labs\\Profiln\\QA\\API Automation\\Github Profiln API Automation\\APIAutomation\\src\\test\\Image\\2.jpg");
+//        File gambar = new File("src/test/Image/2.jpg");
+
+
         response = given()
                 .multiPart("content", "coba Comment")
                 .multiPart("files", gambar)
                 .header("Authorization", "Bearer " + token_Account_1)
-                .contentType("multipart/form-data")
+//                .contentType(ContentType.MULTIPART)
+                .contentType("multipart/form-data; boundary=<calculated when request is sent>")
                 .when()
-                .post(RestAssured.baseURI + "/api/v1/posts/3/comments");
+                .post(RestAssured.baseURI + "/api/v1/posts/5/comments");
+        if (!gambar.exists()) {
+            throw new RuntimeException("File not found: " + gambar.getAbsolutePath());
+        }else{
+            System.out.println("File Path: " + gambar.getPath());
+            System.out.println("File Name: " + gambar.getName());
+            System.out.println("File Absolute Path: " + gambar.getAbsolutePath());
+            System.out.println("File Size (bytes): " + gambar.length());
+            String fileName = gambar.getName();
+            String fileExtension = "";
+            int dotIndex = fileName.lastIndexOf('.');
+            if (dotIndex > 0) {
+                fileExtension = fileName.substring(dotIndex + 1);
+            }
+            System.out.println("File Extension: " + fileExtension);
+        }
+
     }
 
     @When("User send POST HTTPS Request For Comment Post Validation Error")
@@ -718,22 +827,12 @@ public class LoginStepOfDefinition {
 
     @When("User send POST HTTPS Request For Create New Post Not Found")
     public void User_send_POST_HTTPS_Request_For_Create_New_Post_Not_Found(){
-        File gambar = new File("D:/Binar/Binar Labs/Profiln/QA/API Automation/Image/2.jpg");
         response = given()
-                .multiPart("files", gambar)
-                .multiPart("files", gambar)
-                .multiPart("files", gambar)
-                .multiPart("files", gambar)
-                .multiPart("files", gambar)
-                .multiPart("files", gambar)
-                .multiPart("files", gambar)
-                .multiPart("files", gambar)
-                .multiPart("files", gambar)
-                .multiPart("files", gambar)
+                .multiPart("files", "")
                 .header("Authorization", "Bearer " + token_Account_1)
                 .contentType("multipart/form-data")
                 .when()
-                .post(RestAssured.baseURI + "/api/v1/users/me/posts/99999/upload");
+                .post(RestAssured.baseURI + "/api/v1/users/me/posts/999999999/upload");
     }
 
     @When("User send POST HTTPS Request For Create New Post Many Image")
@@ -813,18 +912,9 @@ public class LoginStepOfDefinition {
 
     @When("User send PUT HTTPS Request For Create New Post Not Found")
     public void User_send_PUT_HTTPS_Request_For_Create_New_Post_Not_Found(){
-        File gambar = new File("D:/Binar/Binar Labs/Profiln/QA/API Automation/Image/2.jpg");
+//        File gambar = new File("D:/Binar/Binar Labs/Profiln/QA/API Automation/Image/2.jpg");
         response = given()
-                .multiPart("files", gambar)
-                .multiPart("files", gambar)
-                .multiPart("files", gambar)
-                .multiPart("files", gambar)
-                .multiPart("files", gambar)
-                .multiPart("files", gambar)
-                .multiPart("files", gambar)
-                .multiPart("files", gambar)
-                .multiPart("files", gambar)
-                .multiPart("files", gambar)
+                .multiPart("files", "")
                 .header("Authorization", "Bearer " + token_Account_1)
                 .contentType("multipart/form-data")
                 .when()
@@ -858,15 +948,6 @@ public class LoginStepOfDefinition {
         File gambar = new File("D:/Binar/Binar Labs/Profiln/QA/API Automation/Image/1.jpg");
         response = given()
                 .multiPart("files", gambar)
-                .multiPart("files", gambar)
-                .multiPart("files", gambar)
-                .multiPart("files", gambar)
-                .multiPart("files", gambar)
-                .multiPart("files", gambar)
-                .multiPart("files", gambar)
-                .multiPart("files", gambar)
-                .multiPart("files", gambar)
-                .multiPart("files", gambar)
                 .header("Authorization", "Bearer " + token_Account_1)
                 .contentType("multipart/form-data")
                 .when()
@@ -877,15 +958,6 @@ public class LoginStepOfDefinition {
     public void User_send_PUT_HTTPS_Request_For_Create_New_Post_Wrong_Format(){
         File gambar = new File("D:/Binar/Binar Labs/Profiln/QA/Dokumen/Test Plan.docx");
         response = given()
-                .multiPart("files", gambar)
-                .multiPart("files", gambar)
-                .multiPart("files", gambar)
-                .multiPart("files", gambar)
-                .multiPart("files", gambar)
-                .multiPart("files", gambar)
-                .multiPart("files", gambar)
-                .multiPart("files", gambar)
-                .multiPart("files", gambar)
                 .multiPart("files", gambar)
                 .header("Authorization", "Bearer " + token_Account_1)
                 .contentType("multipart/form-data")
@@ -900,7 +972,7 @@ public class LoginStepOfDefinition {
         response = given()
                 .header("Authorization", "Bearer " + token_Account_1)
                 .when()
-                .delete(RestAssured.baseURI + "/api/v1/users/me/posts/2");
+                .delete(RestAssured.baseURI + "/api/v1/users/me/posts/27");
     }
 
     @When("User send DELETE HTTPS Request For Delete Post Not Found")
@@ -965,7 +1037,7 @@ public class LoginStepOfDefinition {
         response = given()
                 .header("Authorization", "Bearer " + token_Account_1)
                 .when()
-                .get(RestAssured.baseURI + "/api/v1/posts/1");
+                .get(RestAssured.baseURI + "/api/v1/posts/2");
     }
 
     @When("User send Get HTTPS Request For Get All Detail Post Not Found")
@@ -1048,7 +1120,8 @@ public class LoginStepOfDefinition {
                             || "Success unlike post comment".equals(message) || "Success like post comment".equals(message) || "Success update post".equals(message)
                             || "Success repost post".equals(message) || "Success unrepost post".equals(message) || "Success add post images".equals(message)
                             || "Success fetch posts".equals(message) || "Success get post comments".equals(message) || "Success get detail post".equals(message)
-                            || "Success get post comment replies".equals(message) || "Success get user's posts".equals(message));
+                            || "Success get post comment replies".equals(message) || "Success get user's posts".equals(message) || "success".equals(message)
+                            || "Success delete post".equals(message) || "Success follow user".equals(message) || "Success unfollow user".equals(message));
     }
 
     @Then("User receive Error Message")

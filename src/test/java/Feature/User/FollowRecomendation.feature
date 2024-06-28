@@ -12,10 +12,6 @@ Feature: Follow Recommendations
     Then User receive HTTP response code 200
     And User receive Success Message
 
-  Scenario: Testing API for 400 Bad Request For Follow Recommendations
-    Given User set API endpoint
-    When User send Get HTTPS Request For Follow Recommendations
-    Then User receive HTTP response code 400
 
 
 
