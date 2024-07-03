@@ -16,7 +16,7 @@ import java.io.File;
 
 
 
-public class LoginStepOfDefinition {
+public class StepOfDefinition {
 
     private Response response;
     private JSONObject requestBody;
