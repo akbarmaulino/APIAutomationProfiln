@@ -20,8 +20,8 @@ public class StepOfDefinition {
 
     private Response response;
     private JSONObject requestBody;
-    public String token_Account_1 = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImZhenJpLmVnaUBiaW5hci5jby5pZCIsImV4cCI6MTcxOTU3NzcwMCwiaWQiOjF9.sxSP2TKAoJDNaxcpSVzQU4TeObqcuptFep5d33jIAfY";
-    public String token_Account_2 = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6IkV4YW1wbGUwQGdtYWlsLmNvbSIsImV4cCI6MTcxOTU3Nzc0NSwiaWQiOjEwfQ.IyjWFu6YRo4wOgoQdwC1aYdeu6wlR3vDxlB8DKwN_iI";
+    private static int postId;
+    private static String Token;
 
     // Initiation
 
@@ -44,6 +44,9 @@ public class StepOfDefinition {
                 .when()
                 .post(RestAssured.baseURI + "/api/v1/login?type=app");
 
+        String token = response.jsonPath().getString("data.token");
+        TokenManager.setToken("token_Account_1", token);
+        assertNotNull(TokenManager.getToken("token_Account_1"));
 
     }
 
@@ -243,7 +246,7 @@ public class StepOfDefinition {
 
     @When("User send Get HTTPS Request For Follow Recommendations With Login")
     public void user_send_get_https_request_for_follow_Recommendations_with_login(){
-        RequestSpecification request = RestAssured.given().header("Authorization", "Bearer " + token_Account_1);
+        RequestSpecification request = RestAssured.given().header("Authorization", "Bearer " + TokenManager.getToken("token_Account_1"));
         String url = baseURI + "/api/v1/users/me/follow-recommendations?page=1&limit=5";
         response = request.get(url);
     }
@@ -261,7 +264,7 @@ public class StepOfDefinition {
     public void User_send_Post_HTTPS_Request_For_Follow_Another_User_No_Auth(){
 
         response = given()
-                .header("Authorization", "Bearer " + token_Account_1)
+                .header("Authorization", "Bearer " + TokenManager.getToken("token_Account_1"))
                 .when()
                 .post(RestAssured.baseURI + "/api/v1/users/2/follow");
     }
@@ -278,7 +281,7 @@ public class StepOfDefinition {
     public void User_send_Delete_HTTPS_Request_For_Unfollow_Another_User(){
 
         response = given()
-                .header("Authorization", "Bearer " + token_Account_1)
+                .header("Authorization", "Bearer " + TokenManager.getToken("token_Account_1"))
                 .when()
                 .delete(RestAssured.baseURI + "/api/v1/users/2/follow");
     }
@@ -303,10 +306,13 @@ public class StepOfDefinition {
 
         response = given()
                 .contentType(ContentType.JSON)
-                .header("Authorization", "Bearer " + token_Account_1)
+                .header("Authorization", "Bearer " +  TokenManager.getToken("token_Account_1"))
                 .body(requestBody.toString())
                 .when()
                 .post(RestAssured.baseURI + "/api/v1/users/me/posts/");
+
+        postId = response.jsonPath().getInt("data.id");
+        System.out.println(postId);
     }
 
     @When("User send POST HTTPS Request For Create New Post Without Login")
@@ -330,7 +336,7 @@ public class StepOfDefinition {
 
         response = given()
                 .contentType(ContentType.JSON)
-                .header("Authorization", "Bearer " + token_Account_1)
+                .header("Authorization", "Bearer " + TokenManager.getToken("token_Account_1"))
                 .body(requestBody.toString())
                 .when()
                 .post(RestAssured.baseURI + "/api/v1/users/me/posts/");
@@ -340,30 +346,12 @@ public class StepOfDefinition {
 
     @When("User send POST HTTPS Request For Comment Post")
     public void user_send_post_https_request_for_comment_post(){
-//        File gambar = new File("D :/Binar/Binar Labs/Profiln/QA/API Automation/Image/2.jpg");
-//        File imageFile = new File("test/Image/2.jpg");
-//
-//
-//        response = given()
-//                .multiPart("content", "coba Comment")
-//                .multiPart("files", imageFile)
-//                .header("Authorization", "Bearer " + token_Account_1)
-//                .contentType("multipart/form-data")
-//                .when()
-//                .post(RestAssured.baseURI + "/api/v1/posts/3/comments");
-//        if (!imageFile.exists()) {
-//            throw new RuntimeException("File not found: " + imageFile.getAbsolutePath());
-//        }
-//        File gambar = new File("D:\\Binar\\Binar Labs\\Profiln\\QA\\API Automation\\Image\\2.jpg");
         File gambar = new File("D:\\Binar\\Binar Labs\\Profiln\\QA\\API Automation\\Github Profiln API Automation\\APIAutomation\\src\\test\\Image\\2.jpg");
-//        File gambar = new File("src/test/Image/2.jpg");
-
-
         response = given()
                 .multiPart("content", "coba Comment")
                 .multiPart("files", gambar)
-                .header("Authorization", "Bearer " + token_Account_1)
-//                .contentType(ContentType.MULTIPART)
+                .header("Authorization", "Bearer " + TokenManager.getToken("token_Account_1"))
+
                 .contentType("multipart/form-data; boundary=<calculated when request is sent>")
                 .when()
                 .post(RestAssured.baseURI + "/api/v1/posts/5/comments");
@@ -382,14 +370,13 @@ public class StepOfDefinition {
             }
             System.out.println("File Extension: " + fileExtension);
         }
-
     }
 
     @When("User send POST HTTPS Request For Comment Post Validation Error")
     public void user_send_post_https_request_for_comment_post_validation_error(){
         response = given()
                 .multiPart("files", " ")
-                .header("Authorization", "Bearer " + token_Account_1)
+                .header("Authorization", "Bearer " + TokenManager.getToken("token_Account_1"))
                 .contentType("multipart/form-data")
                 .when()
                 .post(RestAssured.baseURI + "/api/v1/posts/3/comments");
@@ -401,7 +388,7 @@ public class StepOfDefinition {
         response = given()
                 .multiPart("content", "coba Comment")
                 .multiPart("files", gambar)
-                .header("Authorization", "Bearer " + token_Account_1)
+                .header("Authorization", "Bearer " + TokenManager.getToken("token_Account_1"))
                 .contentType("multipart/form-data")
                 .when()
                 .post(RestAssured.baseURI + "/api/v1/posts/3/comments");
@@ -414,7 +401,7 @@ public class StepOfDefinition {
                 .multiPart("content", "coba Comment")
                 .multiPart("files", gambar)
                 .multiPart("files", gambar)
-                .header("Authorization", "Bearer " + token_Account_1)
+                .header("Authorization", "Bearer " + TokenManager.getToken("token_Account_1"))
                 .contentType("multipart/form-data")
                 .when()
                 .post(RestAssured.baseURI + "/api/v1/posts/3/comments");
@@ -426,7 +413,7 @@ public class StepOfDefinition {
         response = given()
                 .multiPart("content", "coba Comment")
                 .multiPart("files", gambar)
-                .header("Authorization", "Bearer " + token_Account_1)
+                .header("Authorization", "Bearer " + TokenManager.getToken("token_Account_1"))
                 .contentType("multipart/form-data")
                 .when()
                 .post(RestAssured.baseURI + "/api/v1/posts/3/comments");
@@ -438,7 +425,7 @@ public class StepOfDefinition {
         response = given()
                 .multiPart("content", "coba Comment")
 
-                .header("Authorization", "Bearer " + token_Account_1)
+                .header("Authorization", "Bearer " + TokenManager.getToken("token_Account_1"))
                 .contentType("multipart/form-data")
                 .when()
                 .post(RestAssured.baseURI + "/api/v1/posts/99/comments");
@@ -452,7 +439,7 @@ public class StepOfDefinition {
         response = given()
                 .multiPart("content", "coba Comment buat comment")
 //                .multiPart("files", gambar)
-                .header("Authorization", "Bearer " + token_Account_1)
+                .header("Authorization", "Bearer " + TokenManager.getToken("token_Account_1"))
                 .contentType("multipart/form-data")
                 .when()
                 .post(RestAssured.baseURI + "/api/v1/posts/3/comments/1/replies");
@@ -462,7 +449,7 @@ public class StepOfDefinition {
     public void user_send_post_https_request_for_replay_comment_validation_error(){
         response = given()
                 .multiPart("files", " ")
-                .header("Authorization", "Bearer " + token_Account_1)
+                .header("Authorization", "Bearer " + TokenManager.getToken("token_Account_1"))
                 .contentType("multipart/form-data")
                 .when()
                 .post(RestAssured.baseURI + "/api/v1/posts/3/comments/1/replies");
@@ -474,7 +461,7 @@ public class StepOfDefinition {
         response = given()
                 .multiPart("content", "coba Comment buat comment")
                 .multiPart("files", gambar)
-                .header("Authorization", "Bearer " + token_Account_1)
+                .header("Authorization", "Bearer " + TokenManager.getToken("token_Account_1"))
                 .contentType("multipart/form-data")
                 .when()
                 .post(RestAssured.baseURI + "/api/v1/posts/3/comments/1/replies");
@@ -487,7 +474,7 @@ public class StepOfDefinition {
                 .multiPart("content", "coba Comment")
                 .multiPart("files", gambar)
                 .multiPart("files", gambar)
-                .header("Authorization", "Bearer " + token_Account_1)
+                .header("Authorization", "Bearer " + TokenManager.getToken("token_Account_1"))
                 .contentType("multipart/form-data")
                 .when()
                 .post(RestAssured.baseURI + "/api/v1/posts/3/comments/1/replies");
@@ -499,7 +486,7 @@ public class StepOfDefinition {
         response = given()
                 .multiPart("content", "coba Comment")
                 .multiPart("files", gambar)
-                .header("Authorization", "Bearer " + token_Account_1)
+                .header("Authorization", "Bearer " + TokenManager.getToken("token_Account_1"))
                 .contentType("multipart/form-data")
                 .when()
                 .post(RestAssured.baseURI + "/api/v1/posts/3/comments/1/replies");
@@ -511,7 +498,7 @@ public class StepOfDefinition {
         response = given()
                 .multiPart("content", "coba Comment")
 //                .multiPart("files", gambar)
-                .header("Authorization", "Bearer " + token_Account_1)
+                .header("Authorization", "Bearer " + TokenManager.getToken("token_Account_1"))
                 .contentType("multipart/form-data")
                 .when()
                 .post(RestAssured.baseURI + "/api/v1/posts/99/comments/99/replies");
@@ -543,7 +530,7 @@ public class StepOfDefinition {
 
         response = given()
                 .contentType(ContentType.JSON)
-                .header("Authorization", "Bearer " + token_Account_1)
+                .header("Authorization", "Bearer " + TokenManager.getToken("token_Account_1"))
                 .body(requestBody.toString())
                 .when()
                 .post(RestAssured.baseURI + "/api/v1/posts/3/report");
@@ -557,7 +544,7 @@ public class StepOfDefinition {
 
         response = given()
                 .contentType(ContentType.JSON)
-                .header("Authorization", "Bearer " + token_Account_1)
+                .header("Authorization", "Bearer " + TokenManager.getToken("token_Account_1"))
                 .body(requestBody.toString())
                 .when()
                 .post(RestAssured.baseURI + "/api/v1/posts/3/report");
@@ -586,7 +573,7 @@ public class StepOfDefinition {
     public void User_send_POST_HTTPS_Request_For_Like_Post(){
         response = given()
                 .contentType(ContentType.JSON)
-                .header("Authorization", "Bearer " + token_Account_1)
+                .header("Authorization", "Bearer " + TokenManager.getToken("token_Account_1"))
                 .when()
                 .post(RestAssured.baseURI + "/api/v1/posts/3/like");
     }
@@ -595,7 +582,7 @@ public class StepOfDefinition {
     public void User_send_POST_HTTPS_Request_For_Like_Post_Not_Found(){
         response = given()
                 .contentType(ContentType.JSON)
-                .header("Authorization", "Bearer " + token_Account_1)
+                .header("Authorization", "Bearer " + TokenManager.getToken("token_Account_1"))
                 .when()
                 .post(RestAssured.baseURI + "/api/v1/posts/99/like");
     }
@@ -614,7 +601,7 @@ public class StepOfDefinition {
     public void User_send_DELETE_HTTPS_Request_For_Unlike_Post(){
         response = given()
                 .contentType(ContentType.JSON)
-                .header("Authorization", "Bearer " + token_Account_1)
+                .header("Authorization", "Bearer " + TokenManager.getToken("token_Account_1"))
                 .when()
                 .delete(RestAssured.baseURI + "/api/v1/posts/3/like");
     }
@@ -623,7 +610,7 @@ public class StepOfDefinition {
     public void User_send_DELETE_HTTPS_Request_For_Unlike_Post_Not_Found(){
         response = given()
                 .contentType(ContentType.JSON)
-                .header("Authorization", "Bearer " + token_Account_1)
+                .header("Authorization", "Bearer " + TokenManager.getToken("token_Account_1"))
                 .when()
                 .delete(RestAssured.baseURI + "/api/v1/posts/99/like");
     }
@@ -642,7 +629,7 @@ public class StepOfDefinition {
     public void User_send_POST_HTTPS_Request_For_Like_Post_Comment(){
         response = given()
                 .contentType(ContentType.JSON)
-                .header("Authorization", "Bearer " + token_Account_1)
+                .header("Authorization", "Bearer " + TokenManager.getToken("token_Account_1"))
                 .when()
                 .post(RestAssured.baseURI + "/api/v1/posts/3/comments/3/like");
     }
@@ -651,7 +638,7 @@ public class StepOfDefinition {
     public void User_send_POST_HTTPS_Request_For_Like_Post_Not_Found_Comment(){
         response = given()
                 .contentType(ContentType.JSON)
-                .header("Authorization", "Bearer " + token_Account_1)
+                .header("Authorization", "Bearer " + TokenManager.getToken("token_Account_1"))
                 .when()
                 .post(RestAssured.baseURI + "/api/v1/posts/99/comments/99/like");
     }
@@ -670,7 +657,7 @@ public class StepOfDefinition {
     public void User_send_DELETE_HTTPS_Request_For_Unlike_Post_Comment(){
         response = given()
                 .contentType(ContentType.JSON)
-                .header("Authorization", "Bearer " + token_Account_1)
+                .header("Authorization", "Bearer " + TokenManager.getToken("token_Account_1"))
                 .when()
                 .delete(RestAssured.baseURI + "/api/v1/posts/3/comments/3/like");
     }
@@ -679,7 +666,7 @@ public class StepOfDefinition {
     public void User_send_DELETE_HTTPS_Request_For_Unlike_Post_Not_Found_Comment(){
         response = given()
                 .contentType(ContentType.JSON)
-                .header("Authorization", "Bearer " + token_Account_1)
+                .header("Authorization", "Bearer " + TokenManager.getToken("token_Account_1"))
                 .when()
                 .delete(RestAssured.baseURI + "/api/v1/posts/99/comments/99/like");
     }
@@ -703,7 +690,7 @@ public class StepOfDefinition {
 
         response = given()
                 .contentType(ContentType.JSON)
-                .header("Authorization", "Bearer " + token_Account_1)
+                .header("Authorization", "Bearer " + TokenManager.getToken("token_Account_1"))
                 .body(requestBody.toString())
                 .when()
                 .patch(RestAssured.baseURI + "/api/v1/users/me/posts/3");
@@ -732,7 +719,7 @@ public class StepOfDefinition {
 
         response = given()
                 .contentType(ContentType.JSON)
-                .header("Authorization", "Bearer " + token_Account_1)
+                .header("Authorization", "Bearer " + TokenManager.getToken("token_Account_1"))
                 .body(requestBody.toString())
                 .when()
                 .patch(RestAssured.baseURI + "/api/v1/users/me/posts/9999");
@@ -742,9 +729,24 @@ public class StepOfDefinition {
 
     @When("User send POST HTTPS Request For Repost Post")
     public void User_send_POST_HTTPS_Request_For_Repost_Post(){
+
+        JSONObject requestBody = new JSONObject();
+        requestBody.put("email", "Example0.2125969508634724@gmail.com");
+        requestBody.put("password", "Example123*");
+
         response = given()
                 .contentType(ContentType.JSON)
-                .header("Authorization", "Bearer " + token_Account_2)
+                .body(requestBody.toString())
+                .when()
+                .post(RestAssured.baseURI + "/api/v1/login?type=app");
+
+        String token = response.jsonPath().getString("data.token");
+        TokenManager.setToken("token_Account_2", token);
+        assertNotNull(TokenManager.getToken("token_Account_2"));
+        
+        response = given()
+                .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + TokenManager.getToken("token_Account_2"))
                 .when()
                 .post(RestAssured.baseURI + "/api/v1/posts/3/repost");
     }
@@ -753,7 +755,7 @@ public class StepOfDefinition {
     public void User_send_POST_HTTPS_Request_For_Repost_Post_Not_Found(){
         response = given()
                 .contentType(ContentType.JSON)
-                .header("Authorization", "Bearer " + token_Account_2)
+                .header("Authorization", "Bearer " + TokenManager.getToken("token_Account_2"))
                 .when()
                 .post(RestAssured.baseURI + "/api/v1/posts/99999/repost");
     }
@@ -770,7 +772,7 @@ public class StepOfDefinition {
     public void User_send_POST_HTTPS_Request_For_Repost_Self_Post(){
         response = given()
                 .contentType(ContentType.JSON)
-                .header("Authorization", "Bearer " + token_Account_1)
+                .header("Authorization", "Bearer " + TokenManager.getToken("token_Account_1"))
                 .when()
                 .post(RestAssured.baseURI + "/api/v1/posts/3/repost");
     }
@@ -781,7 +783,7 @@ public class StepOfDefinition {
     public void User_send_POST_HTTPS_Request_For_Unrepost(){
         response = given()
                 .contentType(ContentType.JSON)
-                .header("Authorization", "Bearer " + token_Account_2)
+                .header("Authorization", "Bearer " + TokenManager.getToken("token_Account_2"))
                 .when()
                 .post(RestAssured.baseURI + "/api/v1/posts/3/unrepost");
     }
@@ -798,7 +800,7 @@ public class StepOfDefinition {
     public void User_send_POST_HTTPS_Request_For_Unrepost_Not_Found(){
         response = given()
                 .contentType(ContentType.JSON)
-                .header("Authorization", "Bearer " + token_Account_2)
+                .header("Authorization", "Bearer " + TokenManager.getToken("token_Account_2"))
                 .when()
                 .post(RestAssured.baseURI + "/api/v1/posts/999999/unrepost");
     }
@@ -819,7 +821,7 @@ public class StepOfDefinition {
                 .multiPart("files", gambar)
                 .multiPart("files", gambar)
                 .multiPart("files", gambar)
-                .header("Authorization", "Bearer " + token_Account_1)
+                .header("Authorization", "Bearer " + TokenManager.getToken("token_Account_1"))
                 .contentType("multipart/form-data")
                 .when()
                 .post(RestAssured.baseURI + "/api/v1/users/me/posts/3/upload");
@@ -829,7 +831,7 @@ public class StepOfDefinition {
     public void User_send_POST_HTTPS_Request_For_Create_New_Post_Not_Found(){
         response = given()
                 .multiPart("files", "")
-                .header("Authorization", "Bearer " + token_Account_1)
+                .header("Authorization", "Bearer " + TokenManager.getToken("token_Account_1"))
                 .contentType("multipart/form-data")
                 .when()
                 .post(RestAssured.baseURI + "/api/v1/users/me/posts/999999999/upload");
@@ -851,7 +853,7 @@ public class StepOfDefinition {
                 .multiPart("files", gambar)
                 .multiPart("files", gambar)
                 .multiPart("files", gambar)
-                .header("Authorization", "Bearer " + token_Account_1)
+                .header("Authorization", "Bearer " + TokenManager.getToken("token_Account_1"))
                 .contentType("multipart/form-data")
                 .when()
                 .post(RestAssured.baseURI + "/api/v1/users/me/posts/3/upload");
@@ -862,7 +864,7 @@ public class StepOfDefinition {
         File gambar = new File("D:/Binar/Binar Labs/Profiln/QA/API Automation/Image/1.jpg");
         response = given()
                 .multiPart("files", gambar)
-                .header("Authorization", "Bearer " + token_Account_1)
+                .header("Authorization", "Bearer " + TokenManager.getToken("token_Account_1"))
                 .contentType("multipart/form-data")
                 .when()
                 .post(RestAssured.baseURI + "/api/v1/users/me/posts/3/upload");
@@ -882,7 +884,7 @@ public class StepOfDefinition {
                 .multiPart("files", gambar)
                 .multiPart("files", gambar)
                 .multiPart("files", gambar)
-                .header("Authorization", "Bearer " + token_Account_1)
+                .header("Authorization", "Bearer " + TokenManager.getToken("token_Account_1"))
                 .contentType("multipart/form-data")
                 .when()
                 .post(RestAssured.baseURI + "/api/v1/users/me/posts/3/upload");
@@ -904,7 +906,7 @@ public class StepOfDefinition {
                 .multiPart("files", gambar)
                 .multiPart("files", gambar)
                 .multiPart("files", gambar)
-                .header("Authorization", "Bearer " + token_Account_1)
+                .header("Authorization", "Bearer " + TokenManager.getToken("token_Account_1"))
                 .contentType("multipart/form-data")
                 .when()
                 .put(RestAssured.baseURI + "/api/v1/users/me/posts/3/upload");
@@ -915,7 +917,7 @@ public class StepOfDefinition {
 //        File gambar = new File("D:/Binar/Binar Labs/Profiln/QA/API Automation/Image/2.jpg");
         response = given()
                 .multiPart("files", "")
-                .header("Authorization", "Bearer " + token_Account_1)
+                .header("Authorization", "Bearer " + TokenManager.getToken("token_Account_1"))
                 .contentType("multipart/form-data")
                 .when()
                 .put(RestAssured.baseURI + "/api/v1/users/me/posts/9999999/upload");
@@ -937,7 +939,7 @@ public class StepOfDefinition {
                 .multiPart("files", gambar)
                 .multiPart("files", gambar)
                 .multiPart("files", gambar)
-                .header("Authorization", "Bearer " + token_Account_1)
+                .header("Authorization", "Bearer " + TokenManager.getToken("token_Account_1"))
                 .contentType("multipart/form-data")
                 .when()
                 .put(RestAssured.baseURI + "/api/v1/users/me/posts/3/upload");
@@ -948,7 +950,7 @@ public class StepOfDefinition {
         File gambar = new File("D:/Binar/Binar Labs/Profiln/QA/API Automation/Image/1.jpg");
         response = given()
                 .multiPart("files", gambar)
-                .header("Authorization", "Bearer " + token_Account_1)
+                .header("Authorization", "Bearer " + TokenManager.getToken("token_Account_1"))
                 .contentType("multipart/form-data")
                 .when()
                 .put(RestAssured.baseURI + "/api/v1/users/me/posts/3/upload");
@@ -959,7 +961,7 @@ public class StepOfDefinition {
         File gambar = new File("D:/Binar/Binar Labs/Profiln/QA/Dokumen/Test Plan.docx");
         response = given()
                 .multiPart("files", gambar)
-                .header("Authorization", "Bearer " + token_Account_1)
+                .header("Authorization", "Bearer " + TokenManager.getToken("token_Account_1"))
                 .contentType("multipart/form-data")
                 .when()
                 .put(RestAssured.baseURI + "/api/v1/users/me/posts/3/upload");
@@ -970,15 +972,16 @@ public class StepOfDefinition {
     @When("User send DELETE HTTPS Request For Delete Post")
     public void User_send_DELETE_HTTPS_Request_For_Delete_Post(){
         response = given()
-                .header("Authorization", "Bearer " + token_Account_1)
+                .header("Authorization", "Bearer " + TokenManager.getToken("token_Account_1"))
                 .when()
-                .delete(RestAssured.baseURI + "/api/v1/users/me/posts/27");
+                .delete(RestAssured.baseURI + "/api/v1/users/me/posts/" + postId);
+        System.out.println("/api/v1/users/me/posts/" + postId);
     }
 
     @When("User send DELETE HTTPS Request For Delete Post Not Found")
     public void User_send_DELETE_HTTPS_Request_For_Delete_Post_Not_Found(){
         response = given()
-                .header("Authorization", "Bearer " + token_Account_1)
+                .header("Authorization", "Bearer " + TokenManager.getToken("token_Account_1"))
                 .when()
                 .delete(RestAssured.baseURI + "/api/v1/users/me/posts/99999");
     }
@@ -995,7 +998,7 @@ public class StepOfDefinition {
     @When("User send Get HTTPS Request For Get All")
     public void User_send_Get_HTTPS_Request_For_Get_All(){
         response = given()
-                .header("Authorization", "Bearer " + token_Account_1)
+                .header("Authorization", "Bearer " + TokenManager.getToken("token_Account_1"))
                 .queryParam("page", "1")
                 .queryParam("limit", "10")
                 .queryParam("orderBy", "newest")
@@ -1016,7 +1019,7 @@ public class StepOfDefinition {
     @When("User send Get HTTPS Request For Get All Post Comment")
     public void User_send_Get_HTTPS_Request_For_Get_All_Post_Comment(){
         response = given()
-                .header("Authorization", "Bearer " + token_Account_1)
+                .header("Authorization", "Bearer " + TokenManager.getToken("token_Account_1"))
                 .queryParam("page", "1")
                 .queryParam("limit", "10")
                 .when()
@@ -1035,7 +1038,7 @@ public class StepOfDefinition {
     @When("User send Get HTTPS Request For Get All Detail Post")
     public void User_send_Get_HTTPS_Request_For_Get_All_Detail_Post(){
         response = given()
-                .header("Authorization", "Bearer " + token_Account_1)
+                .header("Authorization", "Bearer " + TokenManager.getToken("token_Account_1"))
                 .when()
                 .get(RestAssured.baseURI + "/api/v1/posts/2");
     }
@@ -1043,7 +1046,7 @@ public class StepOfDefinition {
     @When("User send Get HTTPS Request For Get All Detail Post Not Found")
     public void User_send_Get_HTTPS_Request_For_Get_All_Detail_Post_Not_Found(){
         response = given()
-                .header("Authorization", "Bearer " + token_Account_1)
+                .header("Authorization", "Bearer " + TokenManager.getToken("token_Account_1"))
                 .when()
                 .get(RestAssured.baseURI + "/api/v1/posts/999999");
     }
@@ -1051,7 +1054,7 @@ public class StepOfDefinition {
     @When("User send Get HTTPS Request For Get All Reply")
     public void User_send_Get_HTTPS_Request_For_Get_All_Reply(){
         response = given()
-                .header("Authorization", "Bearer " + token_Account_1)
+                .header("Authorization", "Bearer " + TokenManager.getToken("token_Account_1"))
                 .queryParam("page", "1")
                 .queryParam("limit", "10")
                 .when()
@@ -1070,7 +1073,7 @@ public class StepOfDefinition {
     @When("User send Get HTTPS Request For Get All Post By User ID")
     public void User_send_Get_HTTPS_Request_For_Get_All_Post_By_User_ID(){
         response = given()
-                .header("Authorization", "Bearer " + token_Account_1)
+                .header("Authorization", "Bearer " + TokenManager.getToken("token_Account_1"))
                 .queryParam("page", "1")
                 .queryParam("limit", "5")
                 .when()
@@ -1089,7 +1092,7 @@ public class StepOfDefinition {
     @When("User send Get HTTPS Request For Get All By User ID")
     public void User_send_Get_HTTPS_Request_For_Get_All_By_User_ID(){
         response = given()
-                .header("Authorization", "Bearer " + token_Account_1)
+                .header("Authorization", "Bearer " + TokenManager.getToken("token_Account_1"))
                 .queryParam("page", "1")
                 .queryParam("limit", "5")
                 .when()
