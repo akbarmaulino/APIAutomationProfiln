@@ -1,6 +1,11 @@
 Feature: Send Reset Password To Email
 
 #  Send Reset Password To Email
+  Scenario: User Want To Login With Valid Email and Password
+    Given User set API endpoint
+    When User send POST HTTPS Request using valid Email and Password
+    Then User receive HTTP response code 200
+    And User receive Success Message
 
   Scenario: User Want To Send Reset Password With Valid Email
     Given User set API endpoint
