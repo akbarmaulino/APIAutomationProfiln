@@ -21,7 +21,6 @@ public class StepOfDefinition {
     private Response response;
     private JSONObject requestBody;
     private static int postId;
-    private static String Token;
 
     // Initiation
 
